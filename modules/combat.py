@@ -389,6 +389,8 @@ class CombatModule(object):
         def swipe(cmap):
             if cmap == 'E-C3' or cmap == 'E-A3':
                 Utils.swipe(960, 800, 960, 400, 100)
+            elif cmap == '12-2':
+                Utils.swipe(1000, 570, 1300, 540, 100)
             else:
                 Utils.swipe(960, 540, 1300, 540, 100)
         swipe(self.chapter_map)

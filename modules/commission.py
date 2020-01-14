@@ -17,6 +17,9 @@ class CommissionModule(object):
         self.config = config
         self.stats = stats
         self.region = {
+            # 'item_found': Region(966, 732, 293, 51),
+            # 'home_button': Region(1864, 57, 37, 42),
+            # 'announcement': Region(1790, 100, 100, 67),
             'left_menu': Region(0, 203, 57, 86),
             'collect_oil': Region(206, 105, 98, 58),
             'collect_gold': Region(579, 102, 98, 58),
@@ -29,7 +32,7 @@ class CommissionModule(object):
             'commission_start': Region(1543, 483, 191, 92),
             'oil_warning': Region(1073, 738, 221, 59),
             'button_back': Region(48, 43, 76, 76),
-            'tap_to_continue': Region(661, 840, 598, 203),
+            # 'tap_to_continue': Region(661, 840, 598, 203),
             'dismiss_side_tab': Region(970, 148, 370, 784),
             'dismiss_message': Region(688, 11, 538, 55)
         }
@@ -48,6 +51,26 @@ class CommissionModule(object):
         while True:
             Utils.update_screen()
 
+            if Utils.find("menu/item_found"):
+                Logger.log_msg("Found item message.")
+                Utils.find_and_touch("menu/tap_to_continue")
+                Utils.script_sleep(1)
+                continue
+            if Utils.find("menu/home_button"):
+                Logger.log_msg("Found home button")
+                Utils.find_and_touch("menu/home_button")
+                Utils.script_sleep(1)
+                continue
+            if Utils.find("commission/announcement"):
+                Logger.log_msg("Found Announcement Window")
+                Utils.find_and_touch("commission/announcement")
+                Utils.script_sleep(1)
+                continue
+            if Utils.find("menu/alert_info"):
+                Logger.log_msg("Found alert.")
+                Utils.find_and_touch("menu/alert_close")
+                Utils.script_sleep(1)
+                continue
             if Utils.find("commission/button_completed") and (lambda x:x > 332 and x < 511)(Utils.find("commission/button_completed").y):
                 Logger.log_debug("Found commission complete button.")
                 self.completed_handler()
@@ -81,7 +104,7 @@ class CommissionModule(object):
                 self.stats.increment_commissions_received()
                 continue
             if Utils.find("menu/item_found"):
-                Utils.touch_randomly(self.region["tap_to_continue"])
+                Utils.find_and_touch("menu/tap_to_continue")
                 Utils.script_sleep(1)
                 continue
             if Utils.find("commission/alert_available", 0.9):
