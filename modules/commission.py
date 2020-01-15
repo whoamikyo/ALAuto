@@ -32,11 +32,12 @@ class CommissionModule(object):
             'commission_start': Region(1543, 483, 191, 92),
             'oil_warning': Region(1073, 738, 221, 59),
             'button_back': Region(48, 43, 76, 76),
-            # 'tap_to_continue': Region(661, 840, 598, 203),
+            'tap_to_continue': Region(661, 840, 598, 203),
             'dismiss_side_tab': Region(970, 148, 370, 784),
             'dismiss_message': Region(688, 11, 538, 55)
         }
 
+    @property
     def commission_logic_wrapper(self):
         """Method that fires off the necessary child methods that encapsulates
         the entire action of starting and completing commissions.
@@ -61,9 +62,9 @@ class CommissionModule(object):
                 Utils.find_and_touch("menu/home_button")
                 Utils.script_sleep(1)
                 continue
-            if Utils.find("commission/announcement"):
+            if Utils.find("menu/announcement"):
                 Logger.log_msg("Found Announcement Window")
-                Utils.find_and_touch("commission/announcement")
+                Utils.find_and_touch("menu/announcement")
                 Utils.script_sleep(1)
                 continue
             if Utils.find("menu/alert_info"):
@@ -71,6 +72,7 @@ class CommissionModule(object):
                 Utils.find_and_touch("menu/alert_close")
                 Utils.script_sleep(1)
                 continue
+
             if Utils.find("commission/button_completed") and (lambda x:x > 332 and x < 511)(Utils.find("commission/button_completed").y):
                 Logger.log_debug("Found commission complete button.")
                 self.completed_handler()
