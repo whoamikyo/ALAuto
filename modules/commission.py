@@ -37,7 +37,6 @@ class CommissionModule(object):
             'dismiss_message': Region(688, 11, 538, 55)
         }
 
-    @property
     def commission_logic_wrapper(self):
         """Method that fires off the necessary child methods that encapsulates
         the entire action of starting and completing commissions.
@@ -50,28 +49,24 @@ class CommissionModule(object):
         Utils.touch_randomly(self.region["collect_gold"])
 
         while True:
-            Utils.update_screen()
+            Utils.wait_update_screen(1)
 
             if Utils.find("menu/item_found"):
                 Logger.log_msg("Found item message.")
                 Utils.find_and_touch("menu/tap_to_continue")
                 Utils.script_sleep(1)
-                continue
             if Utils.find("menu/home_button"):
                 Logger.log_msg("Found home button")
                 Utils.find_and_touch("menu/home_button")
                 Utils.script_sleep(1)
-                continue
             if Utils.find("menu/announcement"):
                 Logger.log_msg("Found Announcement Window")
                 Utils.find_and_touch("menu/announcement")
                 Utils.script_sleep(1)
-                continue
             if Utils.find("menu/alert_info"):
                 Logger.log_msg("Found alert.")
                 Utils.find_and_touch("menu/alert_close")
                 Utils.script_sleep(1)
-                continue
 
             if Utils.find("commission/button_completed") and (lambda x:x > 332 and x < 511)(Utils.find("commission/button_completed").y):
                 Logger.log_debug("Found commission complete button.")
