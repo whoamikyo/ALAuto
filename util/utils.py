@@ -9,6 +9,7 @@ from scipy import spatial
 from util.adb import Adb
 from util.logger import Logger
 
+
 class Region(object):
     x, y, w, h = 0, 0, 0, 0
 
@@ -26,11 +27,12 @@ class Region(object):
         self.w = w
         self.h = h
 
+
 screen = None
 last_ocr = ''
 
-class Utils(object):
 
+class Utils(object):
     DEFAULT_SIMILARITY = 0.95
     assets = ''
     locations = ()
@@ -80,7 +82,8 @@ class Utils(object):
         screen = None
         while screen is None:
             if Adb.legacy:
-                screen = cv2.imdecode(numpy.fromstring(Adb.exec_out(r"screencap -p | sed s/\r\n/\n/"),dtype=numpy.uint8),0)
+                screen = cv2.imdecode(
+                    numpy.fromstring(Adb.exec_out(r"screencap -p | sed s/\r\n/\n/"), dtype=numpy.uint8), 0)
             else:
                 screen = cv2.imdecode(numpy.fromstring(Adb.exec_out('screencap -p'), dtype=numpy.uint8), 0)
 
@@ -104,7 +107,7 @@ class Utils(object):
         """
         text = []
 
-        crop = screen[y:y+h, x:x+w]
+        crop = screen[y:y + h, x:x + w]
         crop = cv2.resize(crop, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
         thresh = cv2.threshold(crop, 0, 255, cv2.THRESH_OTSU)[1]
 
@@ -124,9 +127,10 @@ class Utils(object):
 
             width = round(abs((50 - col)) / 2) + 5
             height = round(abs((94 - row)) / 2) + 5
-            resized = cv2.copyMakeBorder(roi, top=height, bottom=height, left=width, right=width, borderType=cv2.BORDER_CONSTANT, value=[0, 0, 0])
+            resized = cv2.copyMakeBorder(roi, top=height, bottom=height, left=width, right=width,
+                                         borderType=cv2.BORDER_CONSTANT, value=[0, 0, 0])
 
-            for x in range(0,10):
+            for x in range(0, 10):
                 template = cv2.imread("assets/numbers/{}.png".format(x), 0)
 
                 result = cv2.matchTemplate(resized, template, cv2.TM_CCOEFF_NORMED)
@@ -188,9 +192,9 @@ class Utils(object):
         template = cv2.imread('assets/{}/{}.png'.format(cls.assets, image), 0)
         if cmap != None:
             if cmap == '7-1':
-                template = cv2.resize(template, None, fx = 1.11, fy = 1.11, interpolation = cv2.INTER_NEAREST)
+                template = cv2.resize(template, None, fx=1.11, fy=1.11, interpolation=cv2.INTER_NEAREST)
             if (cmap == 'E-B3' or cmap == 'E-D3') and image == 'enemy/fleet_boss':
-                template = cv2.resize(template, None, fx = 0.49, fy = 0.49, interpolation = cv2.INTER_NEAREST)
+                template = cv2.resize(template, None, fx=0.49, fy=0.49, interpolation=cv2.INTER_NEAREST)
         width, height = template.shape[::-1]
         match = cv2.matchTemplate(screen, template, cv2.TM_CCOEFF_NORMED)
         value, location = cv2.minMaxLoc(match)[1], cv2.minMaxLoc(match)[3]
@@ -213,7 +217,7 @@ class Utils(object):
         del cls.locations
         template = cv2.imread('assets/{}/{}.png'.format(cls.assets, image), 0)
         if cmap != None and cmap == '7-1':
-            template = cv2.resize(template, None, fx = 1.11, fy = 1.11, interpolation = cv2.INTER_NEAREST)
+            template = cv2.resize(template, None, fx=1.11, fy=1.11, interpolation=cv2.INTER_NEAREST)
         match = cv2.matchTemplate(screen, template, cv2.TM_CCOEFF_NORMED)
         cls.locations = numpy.where(match >= similarity)
 
@@ -231,7 +235,7 @@ class Utils(object):
 
     @classmethod
     def match_resize(cls, image, scale, similarity=DEFAULT_SIMILARITY):
-        template_resize = cv2.resize(image, (), fx = scale, fy = scale, interpolation = cv2.INTER_NEAREST)
+        template_resize = cv2.resize(image, (), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
         match_resize = cv2.matchTemplate(screen, template_resize, cv2.TM_CCOEFF_NORMED)
         numpy.append(cls.locations, numpy.where(match_resize >= similarity))
 
