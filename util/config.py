@@ -152,7 +152,7 @@ class Config(object):
 
         if self.combat['enabled']:
             map = self.combat['map'].split('-')
-            valid_chapters = list(range(1, 13)) + ['E']
+            valid_chapters = list(range(1, 14)) + ['E']
             valid_levels = list(range(1, 5)) + ['A1', 'A2', 'A3', 'A4',
                                                 'B1', 'B2', 'B3', 'B4',
                                                 'C1', 'C2', 'C3', 'C4',
