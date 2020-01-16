@@ -400,6 +400,8 @@ class CombatModule(object):
                 Utils.swipe(1250, 530, 1300, 540, 100)
             elif cmap == '11-3':
                 Utils.swipe(1020, 570, 1300, 540, 100)
+            elif cmap == '13-1':
+                Utils.swipe(1020, 500, 1300, 540, 100)
             else:
                 Utils.swipe(960, 540, 1300, 540, 100)
 
