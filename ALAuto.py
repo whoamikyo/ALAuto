@@ -16,7 +16,6 @@ from util.logger import Logger
 from util.stats import Stats
 from util.utils import Utils, Region
 
-
 class ALAuto(object):
     modules = {
         'updates': None,
@@ -69,9 +68,9 @@ class ALAuto(object):
         """Method to check wether bot should combat or not.
         """
         return self.modules['combat'] \
-               and script.next_combat != 0 \
-               and script.next_combat < datetime.now() \
-               and Utils.check_oil(self.oil_limit)
+            and script.next_combat != 0 \
+            and script.next_combat < datetime.now() \
+            and Utils.check_oil(self.oil_limit)
 
     def run_sortie_cycle(self):
         """Method to run all cycles related to combat.
@@ -154,11 +153,10 @@ class ALAuto(object):
             self.stats.print_stats(Utils.check_oil(self.oil_limit))
         self.print_stats_check = False
 
-
 # check run-time args
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--config',
-                    metavar='CONFIG_FILE',
+                    metavar=('CONFIG_FILE'),
                     help='Use the specified configuration file instead ' +
                          'of the default config.ini')
 parser.add_argument('-d', '--debug',
@@ -228,7 +226,6 @@ try:
             Logger.log_msg("Found alert.")
             Utils.find_and_touch("menu/alert_close")
             Utils.script_sleep(1)
-            continue
         if Utils.find("commission/alert_completed"):
             script.run_commission_cycle()
             script.print_cycle_stats()
@@ -241,7 +238,7 @@ try:
             script.print_cycle_stats()
         else:
             Logger.log_msg("Nothing to do, will check again in a few minutes.")
-            Utils.script_sleep(60)
+            Utils.script_sleep(30)
             continue
 except KeyboardInterrupt:
     # handling ^C from user
