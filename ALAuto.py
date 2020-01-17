@@ -207,25 +207,9 @@ try:
         #     Utils.touch_randomly(Region(54, 57, 67, 67))
         #     Utils.script_sleep(1)
         #     continue
-        if Utils.find("menu/item_found"):
-            Logger.log_msg("Found item message.")
-            Utils.find_and_touch("menu/tap_to_continue")
-            Utils.script_sleep(1)
-            continue
-        if Utils.find("menu/home_button"):
-            Logger.log_msg("Found home button")
-            Utils.find_and_touch("menu/home_button")
-            Utils.script_sleep(1)
-            continue
-        if Utils.find("menu/announcement"):
-            Logger.log_msg("Found Announcement Window")
-            Utils.find_and_touch("menu/announcement")
-            Utils.script_sleep(1)
-            continue
-        if Utils.find("menu/alert_info"):
-            Logger.log_msg("Found alert.")
-            Utils.find_and_touch("menu/alert_close")
-            Utils.script_sleep(1)
+
+        Utils.avoid_stuck_routine()
+
         if Utils.find("commission/alert_completed"):
             script.run_commission_cycle()
             script.print_cycle_stats()

@@ -3,7 +3,6 @@ from util.logger import Logger
 from util.stats import Stats
 from util.config import Config
 
-
 class CommissionModule(object):
 
     def __init__(self, config, stats):
@@ -51,25 +50,8 @@ class CommissionModule(object):
         while True:
             Utils.wait_update_screen(1)
 
-            if Utils.find("menu/item_found"):
-                Logger.log_msg("Found item message.")
-                Utils.find_and_touch("menu/tap_to_continue")
-                Utils.script_sleep(1)
-                continue
-            if Utils.find("menu/home_button"):
-                Logger.log_msg("Found home button")
-                Utils.find_and_touch("menu/home_button")
-                Utils.script_sleep(1)
-                continue
-            if Utils.find("menu/announcement"):
-                Logger.log_msg("Found Announcement Window")
-                Utils.find_and_touch("menu/announcement")
-                Utils.script_sleep(1)
-                continue
-            if Utils.find("menu/alert_info"):
-                Logger.log_msg("Found alert.")
-                Utils.find_and_touch("menu/alert_close")
-                Utils.script_sleep(1)
+            Utils.avoid_stuck_routine()
+
             if Utils.find("commission/button_completed") and (lambda x:x > 332 and x < 511)(Utils.find("commission/button_completed").y):
                 Logger.log_debug("Found commission complete button.")
                 self.completed_handler()
