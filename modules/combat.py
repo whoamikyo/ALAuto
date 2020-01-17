@@ -8,6 +8,13 @@ from util.logger import Logger
 from util.utils import Region, Utils
 
 
+def filter_blacklist(coord, blacklist):
+    for y in blacklist:
+        if abs(coord[0] - y[0]) < 20 and abs(coord[1] - y[1]) < 20:
+            return True
+    return False
+
+
 class CombatModule(object):
     l: List[Any]
 
@@ -407,7 +414,7 @@ class CombatModule(object):
             elif cmap == '13-3':
                 Utils.swipe(1150, 510, 1300, 540, 100)
             elif cmap == '13-4':
-                Utils.swipe(1200, 460, 1300, 540, 100)
+                Utils.swipe(1200, 450, 1300, 540, 100)
             else:
                 Utils.swipe(960, 540, 1300, 540, 100)
 
@@ -484,7 +491,7 @@ class CombatModule(object):
 
     def get_enemies(self, blacklist=[]):
         sim = 0.99
-        if blacklist != []:
+        if blacklist:
             Logger.log_info('Blacklist: ' + str(blacklist))
             self.l = [x for x in self.l if (x not in blacklist)]
 
@@ -495,43 +502,37 @@ class CombatModule(object):
                                                                                Utils.find_all('enemy/fleet_level',
                                                                                               sim - 0.15,
                                                                                               self.chapter_map)))
-            l1 = [x for x in l1 if (not self.filter_blacklist(x, blacklist))]
+            l1 = [x for x in l1 if (not filter_blacklist(x, blacklist))]
             l2 = filter(lambda x: x[1] > 80 and x[1] < 977 and x[0] > 180, map(lambda x: [x[0] + 75, x[1] + 110],
                                                                                Utils.find_all('enemy/fleet_1_down', sim,
                                                                                               self.chapter_map)))
-            l2 = [x for x in l2 if (not self.filter_blacklist(x, blacklist))]
+            l2 = [x for x in l2 if (not filter_blacklist(x, blacklist))]
             l3 = filter(lambda x: x[1] > 80 and x[1] < 977 and x[0] > 180, map(lambda x: [x[0] + 75, x[1] + 110],
                                                                                Utils.find_all('enemy/fleet_2_down',
                                                                                               sim - 0.02,
                                                                                               self.chapter_map)))
-            l3 = [x for x in l3 if (not self.filter_blacklist(x, blacklist))]
+            l3 = [x for x in l3 if (not filter_blacklist(x, blacklist))]
             l4 = filter(lambda x: x[1] > 80 and x[1] < 977 and x[0] > 180, map(lambda x: [x[0] + 75, x[1] + 130],
                                                                                Utils.find_all('enemy/fleet_3_up',
                                                                                               sim - 0.06,
                                                                                               self.chapter_map)))
-            l4 = [x for x in l4 if (not self.filter_blacklist(x, blacklist))]
+            l4 = [x for x in l4 if (not filter_blacklist(x, blacklist))]
             l5 = filter(lambda x: x[1] > 80 and x[1] < 977 and x[0] > 180, map(lambda x: [x[0] + 75, x[1] + 110],
                                                                                Utils.find_all('enemy/fleet_3_down',
                                                                                               sim - 0.06,
                                                                                               self.chapter_map)))
-            l5 = [x for x in l5 if (not self.filter_blacklist(x, blacklist))]
+            l5 = [x for x in l5 if (not filter_blacklist(x, blacklist))]
             l6 = filter(lambda x: x[1] > 80 and x[1] < 977 and x[0] > 180, map(lambda x: [x[0] + 75, x[1] + 110],
                                                                                Utils.find_all('enemy/fleet_2_up',
                                                                                               sim - 0.06,
                                                                                               self.chapter_map)))
-            l6 = [x for x in l6 if (not self.filter_blacklist(x, blacklist))]
+            l6 = [x for x in l6 if (not filter_blacklist(x, blacklist))]
 
             self.l = l1 + l2 + l3 + l4 + l5 + l6
             sim -= 0.005
 
         self.l = Utils.filter_similar_coords(self.l)
         return self.l
-
-    def filter_blacklist(self, coord, blacklist):
-        for y in blacklist:
-            if abs(coord[0] - y[0]) < 20 and abs(coord[1] - y[1]) < 20:
-                return True
-        return False
 
     def get_fleet_location(self):
         """Method to get the fleet's current location. Note it uses the green
@@ -602,7 +603,7 @@ class CombatModule(object):
 
                     l1 = filter(lambda x: x[1] > 80 and x[1] < 977 and x[0] > 180,
                                 map(lambda x: [x[0], x[1] + 140], Utils.find_all('combat/question_mark', sim)))
-                    l1 = [x for x in l1 if (not self.filter_blacklist(x, blacklist))]
+                    l1 = [x for x in l1 if (not filter_blacklist(x, blacklist))]
 
                     mystery_nodes = l1
                     sim -= 0.005
