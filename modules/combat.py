@@ -46,7 +46,9 @@ class CombatModule(object):
             'event_button': Region(1770, 250, 75, 75),
             'lock_ship_button': Region(1086, 739, 200, 55),
             'clear_second_fleet': Region(1690, 473, 40, 40),
-            'menu_nav_back': Region(54, 57, 67, 67)
+            'menu_nav_back': Region(54, 57, 67, 67),
+            'war_archives': Region(410, 1010, 75, 75),
+            'visitors_red': Region(470, 365, 75, 75)
         }
 
     def combat_logic_wrapper(self):
@@ -73,7 +75,7 @@ class CombatModule(object):
                 break
             if Utils.find("commission/button_confirm"):
                 Logger.log_msg("Found commission info message.")
-                Utils.touch_randomly(self.region["combat_com_confirm"])
+                Utils.find_and_touch("commission/button_confirm")
                 continue
             if Utils.find("menu/button_battle"):
                 Logger.log_debug("Found menu battle button.")
@@ -136,6 +138,10 @@ class CombatModule(object):
 
             Utils.touch_randomly(self.region['event_button'])
             Utils.wait_update_screen(1)
+            # Utils.script_sleep(1)
+            # Utils.touch_randomly(self.region['visitors_red'])
+            # Utils.wait_update_screen(1)
+            # Utils.script_sleep(1)
 
             if event_maps.index(letter) < 2 and Utils.find("menu/button_normal_mode", 0.8) or \
                event_maps.index(letter) > 1 and not Utils.find("menu/button_normal_mode", 0.8):
@@ -236,7 +242,7 @@ class CombatModule(object):
                 return
             if Utils.find("commission/button_confirm"):
                 Logger.log_msg("Found commission info message.")
-                Utils.touch_randomly(self.region["combat_com_confirm"])
+                Utils.find_and_touch("commission/button_confirm")
                 continue
             if Utils.find("combat/button_retreat"):
                 Utils.script_sleep(3)
