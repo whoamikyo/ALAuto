@@ -24,6 +24,8 @@ class MissionModule(object):
         while True:
             Utils.update_screen()
 
+            Utils.avoid_stuck_routine()
+
             if Utils.find("mission/alert_completed"):
                 Logger.log_msg("Found mission completed alert.")
                 Utils.touch_randomly(self.region["mission_menu"])

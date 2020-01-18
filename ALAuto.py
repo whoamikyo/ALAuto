@@ -200,15 +200,13 @@ else:
 
 try:
     while True:
-        Utils.wait_update_screen(1)
+        Utils.update_screen()
 
         # temporal solution to event alerts
         # if not Utils.find("menu/button_battle"):
         #     Utils.touch_randomly(Region(54, 57, 67, 67))
         #     Utils.script_sleep(1)
         #     continue
-
-        Utils.avoid_stuck_routine()
 
         if Utils.find("commission/alert_completed"):
             script.run_commission_cycle()
