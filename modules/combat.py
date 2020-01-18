@@ -302,6 +302,7 @@ class CombatModule(object):
                     Logger.log_msg("Blacklisting location and searching for another enemy.")
                     self.blacklist.append(location[0:2])
                     self.l.clear()
+                    Utils.swipe(960, 540, 960, 820, 300)
 
                     location = self.get_closest_target(self.blacklist)
                     count = 0
