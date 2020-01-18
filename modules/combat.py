@@ -305,7 +305,7 @@ class CombatModule(object):
                 if count != 0 and count % 3 == 0:
                     Utils.touch(location)
                 if count > 21:
-                    Logger.log_msg("Blacklisting location and searching for another enemy.")
+                    Logger.log_msg("Blacklisting location and swipe-up.")
                     self.blacklist.append(location[0:2])
                     self.l.clear()
                     Utils.swipe(960, 540, 960, 820, 300)
@@ -399,7 +399,7 @@ class CombatModule(object):
             elif cmap == '11-3':
                 Utils.swipe(1020, 570, 1300, 540, 100)
             elif cmap == '11-4':
-                Utils.swipe(1250, 700, 1300, 540, 100)
+                Utils.swipe(1400, 680, 1300, 540, 100)
             elif cmap == '12-2':
                 Utils.swipe(1000, 570, 1300, 540, 100)
             elif cmap == '12-3':
