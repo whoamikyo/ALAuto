@@ -222,7 +222,7 @@ try:
             script.print_cycle_stats()
         else:
             Logger.log_msg("Nothing to do, will check again in a few minutes.")
-            Utils.script_sleep(30)
+            Utils.script_sleep(60)
             continue
 except KeyboardInterrupt:
     # handling ^C from user
