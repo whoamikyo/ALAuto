@@ -49,10 +49,8 @@ class Config(object):
         if config.getboolean('Headquarters', 'Dorm') or config.getboolean('Headquarters', 'Academy'):
             self._read_headquarters(config)
 
-        self.commissions['enabled'] = config.getboolean(
-            'Modules', 'Commissions')
-        self.enhancement['enabled'] = config.getboolean(
-            'Modules', 'Enhancement')
+        self.commissions['enabled'] = config.getboolean('Modules', 'Commissions')
+        self.enhancement['enabled'] = config.getboolean('Modules', 'Enhancement')
         self.missions['enabled'] = config.getboolean('Modules', 'Missions')
         self.retirement['enabled'] = config.getboolean('Modules', 'Retirement')
 
@@ -68,8 +66,7 @@ class Config(object):
             Logger.log_error("Invalid config. Please check your config file.")
             sys.exit(1)
         elif (not self.ok and self.initialized):
-            Logger.log_warning(
-                "Config change detected, but with problems. Rolling back config.")
+            Logger.log_warning("Config change detected, but with problems. Rolling back config.")
             self._rollback_config(backup_config)
         elif (self.ok and self.initialized):
             if backup_config != self.__dict__:
@@ -93,8 +90,7 @@ class Config(object):
         self.combat['map'] = config.get('Combat', 'Map')
         self.combat['oil_limit'] = int(config.get('Combat', 'OilLimit'))
         self.combat['retire_cycle'] = config.get('Combat', 'RetireCycle')
-        self.combat['retreat_after'] = int(
-            config.get('Combat', 'RetreatAfter'))
+        self.combat['retreat_after'] = int(config.get('Combat', 'RetreatAfter'))
 
     def _read_headquarters(self, config):
         """Method to parse the Headquarters settings passed in config.
@@ -104,8 +100,7 @@ class Config(object):
         self.dorm['enabled'] = config.getboolean('Headquarters', 'Dorm')
         self.academy['enabled'] = config.getboolean('Headquarters', 'Academy')
         if self.academy['enabled']:
-            self.academy['skill_book_tier'] = int(
-                config.get('Headquarters', 'SkillBookTier'))
+            self.academy['skill_book_tier'] = int(config.get('Headquarters', 'SkillBookTier'))
 
     def _read_event(self, config):
         """Method to parse the Event settings of the passed in config.
@@ -140,24 +135,20 @@ class Config(object):
         valid_servers = ['EN', 'JP']
         if self.assets['server'] not in valid_servers:
             if len(valid_servers) < 2:
-                Logger.log_error("Invalid assets configured. Only {} is supported.".format(
-                    ''.join(valid_servers)))
+                Logger.log_error("Invalid assets configured. Only {} is supported.".format(''.join(valid_servers)))
             else:
-                Logger.log_error("Invalid assets configured. Only {} and {} are supported.".format(
-                    ', '.join(valid_servers[:-1]), valid_servers[-1]))
+                Logger.log_error("Invalid assets configured. Only {} and {} are supported.".format(', '.join(valid_servers[:-1]), valid_servers[-1]))
             self.ok = False
 
         if not self.combat['enabled'] and not self.commissions['enabled'] and not self.enhancement['enabled'] \
            and not self.missions['enabled'] and not self.retirement['enabled'] and not self.events['enabled']:
-            Logger.log_error(
-                "All modules are disabled, consider checking your config.")
+            Logger.log_error("All modules are disabled, consider checking your config.")
             self.ok = False
 
         if self.updates['enabled']:
             if self.updates['channel'] != 'Release' and self.updates['channel'] != 'Development':
                 self.ok = False
-                Logger.log_error(
-                    "Invalid update channel, please check the wiki.")
+                Logger.log_error("Invalid update channel, please check the wiki.")
 
         if self.combat['enabled']:
             map = self.combat['map'].split('-')
@@ -168,10 +159,10 @@ class Config(object):
                                                 'D1', 'D2', 'D3', 'D4',
                                                 'SP1', 'SP2', 'SP3']
             if (try_cast_to_int(map[0]) not in valid_chapters or
-                    try_cast_to_int(map[1]) not in valid_levels):
+                try_cast_to_int(map[1]) not in valid_levels):
                 self.ok = False
                 Logger.log_error("Invalid Map Selected: '{}'."
-                                 .format(self.combat['map']))
+                                .format(self.combat['map']))
 
             if not isinstance(self.combat['oil_limit'], int):
                 self.ok = False
@@ -180,8 +171,7 @@ class Config(object):
         if self.events['enabled']:
             if self.events['name'] != 'Crosswave' or ',' not in self.events['levels']:
                 self.ok = False
-                Logger.log_error(
-                    "Invalid event settings, please check the wiki.")
+                Logger.log_error("Invalid event settings, please check the wiki.")
 
     def _rollback_config(self, config):
         """Method to roll back the config to the passed in config's.

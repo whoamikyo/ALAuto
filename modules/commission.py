@@ -3,7 +3,6 @@ from util.logger import Logger
 from util.stats import Stats
 from util.config import Config
 
-
 class CommissionModule(object):
 
     def __init__(self, config, stats):
@@ -51,30 +50,12 @@ class CommissionModule(object):
         while True:
             Utils.wait_update_screen(1)
 
-            if Utils.find("menu/item_found"):
-                Logger.log_msg("Found item message.")
-                Utils.find_and_touch("menu/tap_to_continue")
-                Utils.script_sleep(1)
-                continue
-            if Utils.find("menu/home_button"):
-                Logger.log_msg("Found home button")
-                Utils.find_and_touch("menu/home_button")
-                Utils.script_sleep(1)
-                continue
-            if Utils.find("menu/announcement"):
-                Logger.log_msg("Found Announcement Window")
-                Utils.find_and_touch("menu/announcement")
-                Utils.script_sleep(1)
-                continue
-            if Utils.find("menu/alert_info"):
-                Logger.log_msg("Found alert.")
-                Utils.find_and_touch("menu/alert_close")
-                Utils.script_sleep(1)
+            Utils.avoid_stuck_routine()
 
-            if Utils.find("commission/button_completed") and (lambda x: x > 332 and x < 511)(Utils.find("commission/button_completed").y):
+            if Utils.find("commission/button_completed") and (lambda x:x > 332 and x < 511)(Utils.find("commission/button_completed").y):
                 Logger.log_debug("Found commission complete button.")
                 self.completed_handler()
-            if Utils.find("commission/alert_available", 0.9) and (lambda x: x > 332 and x < 511)(Utils.find("commission/alert_available", 0.9).y):
+            if Utils.find("commission/alert_available", 0.9) and (lambda x:x > 332 and x < 511)(Utils.find("commission/alert_available", 0.9).y):
                 Logger.log_debug("Found commission available indicator.")
                 Utils.touch_randomly(self.region["button_go"])
                 Utils.script_sleep(1)
@@ -83,7 +64,7 @@ class CommissionModule(object):
                     self.daily_handler()
                 Utils.touch_randomly(self.region["button_back"])
                 continue
-            if Utils.find("commission/button_go") and (lambda x: x > 332 and x < 511)(Utils.find("commission/button_go").y):
+            if Utils.find("commission/button_go") and (lambda x:x > 332 and x < 511)(Utils.find("commission/button_go").y):
                 Logger.log_msg("All commissions are running.")
                 Utils.touch_randomly(self.region["dismiss_side_tab"])
                 Utils.wait_update_screen(3)
