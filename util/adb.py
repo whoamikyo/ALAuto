@@ -74,3 +74,14 @@ class Adb(object):
         cmd = ['adb', Adb.device, 'shell'] + args.split(' ')
         Logger.log_debug(str(cmd))
         subprocess.call(cmd)
+
+    @staticmethod
+    def restart_game():
+        """Kill the game and restart """
+
+        cmd = ['adb', 'shell', 'am', 'force-stop', 'com.YoStarEN.AzurLane']
+        Logger.log_debug(str(cmd))
+        subprocess.call(cmd)
+        cmd = ['adb', 'shell', 'am', 'start', '-n', 'com.YoStarEN.AzurLane/com.manjuu.azurlane.PrePermissionActivity']
+        Logger.log_debug(str(cmd))
+        subprocess.call(cmd)

@@ -2,6 +2,7 @@ import sys
 import traceback
 import argparse
 from modules.combat import CombatModule
+from modules.dailyraid import DailyModule
 from modules.commission import CommissionModule
 from modules.enhancement import EnhancementModule
 from modules.mission import MissionModule
@@ -25,7 +26,8 @@ class ALAuto(object):
         'missions': None,
         'retirement': None,
         'headquarters': None,
-        'event': None
+        'event': None,
+        'daily': None,
     }
 
     def __init__(self, config):
@@ -38,6 +40,7 @@ class ALAuto(object):
         """
         self.config = config
         self.oil_limit = 0
+        self.config.pause = 0
         self.stats = Stats(config)
         if self.config.updates['enabled']:
             self.modules['updates'] = UpdateUtil(self.config)
@@ -48,6 +51,8 @@ class ALAuto(object):
             self.modules['commissions'] = CommissionModule(self.config, self.stats)
         if self.config.enhancement['enabled']:
             self.modules['enhancement'] = EnhancementModule(self.config, self.stats)
+        if self.config.daily['enabled']:
+            self.modules['daily'] = DailyModule(self.config, self.stats)
         if self.config.missions['enabled']:
             self.modules['missions'] = MissionModule(self.config, self.stats)
         if self.config.retirement['enabled']:
@@ -134,6 +139,11 @@ class ALAuto(object):
         if self.modules['retirement']:
             self.modules['retirement'].retirement_logic_wrapper()
 
+    def run_daily_cycle(self):
+
+        if self.modules['daily']:
+            self.modules['daily'].daily_logic_wrapper()
+
     def run_hq_cycle(self):
         """Method to run the headquarters cycle.
         """
@@ -200,16 +210,15 @@ else:
 
 try:
     while True:
-        Utils.wait_update_screen(1)
-
+        Utils.update_screen()
+        Utils.avoid_stuck_routine()
         # temporal solution to event alerts
         # if not Utils.find("menu/button_battle"):
         #     Utils.touch_randomly(Region(54, 57, 67, 67))
         #     Utils.script_sleep(1)
         #     continue
-
-        Utils.avoid_stuck_routine()
-
+        if Utils.find("menu/button_battle"):
+            script.run_daily_cycle()
         if Utils.find("commission/alert_completed"):
             script.run_commission_cycle()
             script.print_cycle_stats()

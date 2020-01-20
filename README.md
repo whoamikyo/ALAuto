@@ -1,3 +1,10 @@
+# Developer Disclaimer
+My fork is focused on developing and testing new features, bugs are expected but with due feedback they will be resolved quickly, if you are interested in testing new features and helping in the development of the main project.
+
+Changelog:
+
+Soon...
+
 # ALAuto
 Updated and semi-rewritten version of [azurlane-auto](https://github.com/perryhuynh/azurlane-auto).  
 Automates Combat, Commissions, Missions, Enhancement, Retiring, Skill Levelling, Dorm Refilling and Dorm Cleaning.
