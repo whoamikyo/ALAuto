@@ -26,11 +26,13 @@ class Config(object):
         self.enhancement = {'enabled': False}
         self.missions = {'enabled': False}
         self.retirement = {'enabled': False}
+        self.daily = {'enabled': False}
         self.dorm = {'enabled': False}
         self.academy = {'enabled': False}
         self.events = {'enabled': False}
         self.network = {}
         self.assets = {}
+        self.pause = {}
         self.read()
 
     def read(self):
@@ -53,6 +55,7 @@ class Config(object):
         self.enhancement['enabled'] = config.getboolean('Modules', 'Enhancement')
         self.missions['enabled'] = config.getboolean('Modules', 'Missions')
         self.retirement['enabled'] = config.getboolean('Modules', 'Retirement')
+        self.daily['enabled'] = config.getboolean('Modules', 'DailyRaid')
 
         if config.getboolean('Events', 'Enabled'):
             self._read_event(config)
@@ -88,9 +91,11 @@ class Config(object):
         """
         self.combat['enabled'] = True
         self.combat['map'] = config.get('Combat', 'Map')
+        self.combat['boss_fleet'] = config.getboolean('Combat', 'BossFleet')
         self.combat['oil_limit'] = int(config.get('Combat', 'OilLimit'))
         self.combat['retire_cycle'] = config.get('Combat', 'RetireCycle')
         self.combat['retreat_after'] = int(config.get('Combat', 'RetreatAfter'))
+        self.pause['pause_interval'] = int(config.get('Combat', 'PauseInterval'))
 
     def _read_headquarters(self, config):
         """Method to parse the Headquarters settings passed in config.
@@ -135,13 +140,14 @@ class Config(object):
         valid_servers = ['EN', 'JP']
         if self.assets['server'] not in valid_servers:
             if len(valid_servers) < 2:
-                Logger.log_error("Invalid assets configured. Only {} is supported.".format(''.join(valid_servers)))
+                Logger.log_error("Invalid server assets configured. Only {} is supported.".format(''.join(valid_servers)))
             else:
-                Logger.log_error("Invalid assets configured. Only {} and {} are supported.".format(', '.join(valid_servers[:-1]), valid_servers[-1]))
+                Logger.log_error("Invalid server assets configured. Only {} and {} are supported.".format(', '.join(valid_servers[:-1]), valid_servers[-1]))
             self.ok = False
 
         if not self.combat['enabled'] and not self.commissions['enabled'] and not self.enhancement['enabled'] \
-           and not self.missions['enabled'] and not self.retirement['enabled'] and not self.events['enabled']:
+           and not self.missions['enabled'] and not self.retirement['enabled'] and not self.events['enabled'] \
+            and not self.daily['enabled']:
             Logger.log_error("All modules are disabled, consider checking your config.")
             self.ok = False
 

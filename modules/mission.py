@@ -24,8 +24,6 @@ class MissionModule(object):
         while True:
             Utils.update_screen()
 
-            Utils.avoid_stuck_routine()
-
             if Utils.find("mission/alert_completed"):
                 Logger.log_msg("Found mission completed alert.")
                 Utils.touch_randomly(self.region["mission_menu"])
@@ -44,6 +42,7 @@ class MissionModule(object):
                 if Utils.find("mission/button_collect"):
                     Logger.log_msg("Collected all missions.")
                     Utils.touch_randomly(self.region["collect"])
+                    Utils.script_sleep(3)
                     continue
                 if Utils.find("mission/button_claim"):
                     Logger.log_msg("Claimed mission.")
@@ -55,5 +54,5 @@ class MissionModule(object):
                 else:
                     Logger.log_msg("No more missions to claim/collect.")
                     Utils.touch_randomly(self.region["button_back"])
-                    Utils.wait_update_screen(1)
+                    Utils.menu_navigate("menu/button_battle")
                     return True

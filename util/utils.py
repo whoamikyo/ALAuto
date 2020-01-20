@@ -36,7 +36,6 @@ class Utils(object):
     locations = ()
 
 
-
     @staticmethod
     def multithreader(threads):
         """Method for starting and threading multithreadable Threads in
@@ -365,20 +364,24 @@ class Utils(object):
         """Method to avoid some messages to avoid stuck at them"""
 
         # while True:
-
         if Utils.find("menu/item_found"):
             Logger.log_msg("Found item message.")
             Utils.find_and_touch("menu/tap_to_continue")
             # continue
-        if Utils.find("menu/home_button"):
-            Logger.log_msg("Found home button")
+        if Utils.find("menu/monthly"):
+            Logger.log_msg("Found monthly login window")
             Utils.find_and_touch("menu/home_button")
             # continue
-        if Utils.find("menu/announcement"):
-            Logger.log_msg("Found Announcement Window")
+        if Utils.find("menu/announcement_window"):
+            Logger.log_msg("Found Announcement Window.")
+            Utils.script_sleep(1)
+            Utils.find_and_touch("menu/notified")
+            Logger.log_msg("Marked as notified.")
+            Utils.script_sleep(1)
             Utils.find_and_touch("menu/announcement")
             # continue
         if Utils.find("menu/alert_info"):
             Logger.log_msg("Found alert.")
             Utils.find_and_touch("menu/alert_close")
-            # continue
+            # return True
+            # Utils.update_screen()
