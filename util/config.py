@@ -32,7 +32,6 @@ class Config(object):
         self.events = {'enabled': False}
         self.network = {}
         self.assets = {}
-        self.pause = {}
         self.read()
 
     def read(self):
@@ -95,7 +94,7 @@ class Config(object):
         self.combat['oil_limit'] = int(config.get('Combat', 'OilLimit'))
         self.combat['retire_cycle'] = config.get('Combat', 'RetireCycle')
         self.combat['retreat_after'] = int(config.get('Combat', 'RetreatAfter'))
-        self.pause['pause_interval'] = int(config.get('Combat', 'PauseInterval'))
+        self.combat['pause'] = int(config.get('Combat', 'PauseInterval'))
 
     def _read_headquarters(self, config):
         """Method to parse the Headquarters settings passed in config.

@@ -1,4 +1,5 @@
 import sys
+import re
 import traceback
 import argparse
 from modules.combat import CombatModule
@@ -197,9 +198,9 @@ adb = Adb()
 
 if adb.init():
     Logger.log_msg('Successfully connected to the service.')
-    res = ['1920x1080', '1080x1920']
+    output = Adb.exec_out('wm size').decode('utf-8').strip()
 
-    if Adb.exec_out('wm size').decode('utf-8').strip()[15:] not in res:
+    if not re.search('1920x1080|1080x1920', output):
         Logger.log_error("Resolution is not 1920x1080, please change it.")
         sys.exit()
 
@@ -232,6 +233,7 @@ try:
         else:
             Logger.log_msg("Nothing to do, will check again in a few minutes.")
             Utils.script_sleep(60)
+
             continue
 except KeyboardInterrupt:
     # handling ^C from user

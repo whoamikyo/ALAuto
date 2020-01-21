@@ -685,14 +685,7 @@ class CombatModule(object):
         """
         while True:
             # Get config input
-            num = self.config.pause['pause_interval']
-
-            # Try to convert it to a int
-            # try:
-            #     num = int(num)
-            # except ValueError:
-            #     print('Pause interval must be an integer.\n')
-            #     continue
+            num = self.config.combat['pause']
 
             # Run time.sleep()
             Logger.log_info('ALAuto paused in: %s' % time.ctime())
