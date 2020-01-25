@@ -110,11 +110,4 @@ venv.bak/
 # own files
 start.bat
 config-local.ini
-.idea/workspace.xml
-.idea/vcs.xml
-.idea/vagrant.xml
-.idea/rSettings.xml
-.idea/modules.xml
-.idea/misc.xml
-.idea/inspectionProfiles/profiles_settings.xml
-.idea/ALAuto.iml
+.idea/
