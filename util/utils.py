@@ -363,15 +363,13 @@ class Utils(object):
     def avoid_stuck_routine():
         """Method to avoid some messages to avoid stuck at them"""
 
-        # while True:
+
         if Utils.find("menu/item_found"):
             Logger.log_msg("Found item message.")
             Utils.find_and_touch("menu/tap_to_continue")
-            # continue
         if Utils.find("menu/monthly"):
             Logger.log_msg("Found monthly login window")
             Utils.find_and_touch("menu/home_button")
-            # continue
         if Utils.find("menu/announcement_window"):
             Logger.log_msg("Found Announcement Window.")
             Utils.script_sleep(1)
@@ -379,9 +377,27 @@ class Utils(object):
             Logger.log_msg("Marked as notified.")
             Utils.script_sleep(1)
             Utils.find_and_touch("menu/announcement")
-            # continue
         if Utils.find("menu/alert_info"):
             Logger.log_msg("Found alert.")
-            Utils.find_and_touch("menu/alert_close")
-            # return True
-            # Utils.update_screen()
+            Utils.touch_randomly(Region(1086, 739, 200, 55))
+            Utils.update_screen()
+        if Utils.find("menu/drop_ssr"):
+            Logger.log_msg("Received SSR ship as drop.")
+            Utils.touch_randomly(Region(1228, 103, 692, 735))
+            Utils.script_sleep(1)
+        if Utils.find("menu/drop_elite"):
+            Logger.log_msg("Received ELITE ship as drop.")
+            Utils.touch_randomly(Region(1228, 103, 692, 735))
+            Utils.script_sleep(1)
+        if Utils.find("menu/drop_rare"):
+            Logger.log_msg("Received new RARE ship as drop.")
+            Utils.touch_randomly(Region(1228, 103, 692, 735))
+            Utils.script_sleep(1)
+        if Utils.find("menu/drop_common"):
+            Logger.log_msg("Received new COMMON ship as drop.")
+            Utils.touch_randomly(Region(1228, 103, 692, 735))
+            Utils.script_sleep(1)
+        if Utils.find("combat/alert_lock"):
+            Logger.log_msg("Locking received ship.")
+            Utils.touch_randomly(Region(1086, 739, 200, 55))
+

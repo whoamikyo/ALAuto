@@ -49,8 +49,8 @@ class CombatModule(object):
             'clear_second_fleet': Region(1690, 473, 40, 40),
             'button_switch_fleet': Region(1430, 985, 240, 60),
             'menu_nav_back': Region(54, 57, 67, 67),
-            'war_archives': Region(410, 1010, 75, 75),
-            'visitors_red': Region(470, 365, 75, 75)
+            'war_archives': Region(330, 987, 147, 33),
+            'visitors_red': Region(159, 243, 382, 148)
         }
 
     def combat_logic_wrapper(self):
@@ -75,22 +75,17 @@ class CombatModule(object):
                 Utils.touch_randomly(self.region['close_info_dialog'])
                 self.exit = 2
                 break
-
             # if Utils.find("commission/button_confirm"):
             #     Logger.log_msg("Found commission info message.")
             #     Utils.find_and_touch("commission/button_confirm")
             #     continue
-            Utils.avoid_stuck_routine()
-
+            # Utils.avoid_stuck_routine()
 
             if Utils.find("menu/button_battle"):
                 Logger.log_debug("Found menu battle button.")
                 Utils.touch_randomly(self.region["menu_button_battle"])
                 Utils.wait_update_screen(1)
                 continue
-            # if Utils.find("combat/menu_fleet") and (lambda x:x > 414 and x < 584)(Utils.find("combat/menu_fleet").y):
-            #     if not self.chapter_map[0].isdigit() and string.ascii_uppercase.index(self.chapter_map[2:3]) < 1 or \
-            #         self.chapter_map[0].isdigit():
             if Utils.find("combat/menu_fleet") and (lambda x: x > 414 and x < 584)(Utils.find("combat/menu_fleet").y) and not self.config.combat['boss_fleet']:
                 if not self.chapter_map[0].isdigit() and string.ascii_uppercase.index(self.chapter_map[2:3]) < 1 or self.chapter_map[0].isdigit():
                     Logger.log_msg("Removing second fleet from fleet selection.")
@@ -130,7 +125,6 @@ class CombatModule(object):
 
         Utils.script_sleep(1)
         Utils.menu_navigate("menu/button_battle")
-        # self.script_pause()
 
         return self.exit and self.script_pause()
 
@@ -146,10 +140,14 @@ class CombatModule(object):
             letter = self.chapter_map[2:3]
             event_maps = ['A', 'B', 'C', 'D']
 
-            Utils.touch_randomly(self.region['event_button'])
+            # Utils.touch_randomly(self.region['event_button'])
+            Utils.touch_randomly(self.region['war_archives'])
+            Utils.script_sleep(1)
+            Utils.touch_randomly(self.region['visitors_red'])
+            Utils.script_sleep(1)
+
             Utils.wait_update_screen(1)
             # Utils.script_sleep(1)
-            # Utils.touch_randomly(self.region['visitors_red'])
             # Utils.wait_update_screen(1)
             # Utils.script_sleep(1)
 
@@ -402,7 +400,6 @@ class CombatModule(object):
             Logger.log_warning("Fleet lock is not supported, disabling it.")
             Utils.wait_update_screen()
 
-        #swipe map to fit everything on screen
         #swipe map to fit everything on screen
         swipes = {
             'E-C3': lambda: Utils.swipe(960, 800, 960, 400, 100),

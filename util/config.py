@@ -94,7 +94,7 @@ class Config(object):
         self.combat['oil_limit'] = int(config.get('Combat', 'OilLimit'))
         self.combat['retire_cycle'] = config.get('Combat', 'RetireCycle')
         self.combat['retreat_after'] = int(config.get('Combat', 'RetreatAfter'))
-        self.combat['pause'] = int(config.get('Combat', 'PauseInterval'))
+        self.combat['pause'] = int(config.get('Combat', 'Pause'))
 
     def _read_headquarters(self, config):
         """Method to parse the Headquarters settings passed in config.
@@ -174,7 +174,8 @@ class Config(object):
                 Logger.log_error("Oil limit must be an integer.")
 
         if self.events['enabled']:
-            if self.events['name'] != 'Crosswave' or ',' not in self.events['levels']:
+            events = ['Crosswave', 'Royal_Maids']
+            if self.events['name'] not in events or ',' not in self.events['levels']:
                 self.ok = False
                 Logger.log_error("Invalid event settings, please check the wiki.")
 
