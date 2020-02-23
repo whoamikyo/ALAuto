@@ -52,7 +52,17 @@ class Config(object):
         self.commissions['enabled'] = config.getboolean('Modules', 'Commissions')
         self.enhancement['enabled'] = config.getboolean('Modules', 'Enhancement')
         self.missions['enabled'] = config.getboolean('Modules', 'Missions')
-        self.retirement['enabled'] = config.getboolean('Modules', 'Retirement')
+        
+        if 'Retirement' in config:
+            # New retirement settings
+            self.retirement['enabled'] = config.getboolean('Retirement', 'enabled', fallback=False)
+            self.retirement['rares'] = config.getboolean('Retirement', 'Rares', fallback=True)
+            self.retirement['commons'] = config.getboolean('Retirement', 'Commons', fallback=True)
+        elif 'Retirement' in config['Modules']:
+            # Legacy retirement setting. Maintain classic rare retirement behavior
+            self.retirement['enabled'] = config.getboolean('Modules', 'Retirement')
+            self.retirement['rares'] = True
+            self.retirement['commons'] = True
 
         if config.getboolean('Events', 'Enabled'):
             self._read_event(config)
@@ -90,7 +100,7 @@ class Config(object):
         self.combat['map'] = config.get('Combat', 'Map')
         self.combat['boss_fleet'] = config.getboolean('Combat', 'BossFleet')
         self.combat['oil_limit'] = int(config.get('Combat', 'OilLimit'))
-        self.combat['retire_cycle'] = config.get('Combat', 'RetireCycle')
+        self.combat['retire_cycle'] = int(config.get('Combat', 'RetireCycle'))
         self.combat['retreat_after'] = int(config.get('Combat', 'RetreatAfter'))
         self.combat['hide_subs_hunting_range'] = config.getboolean('Combat', 'HideSubsHuntingRange')
         self.combat['small_boss_icon'] = config.getboolean('Combat', 'SmallBossIcon')
@@ -173,6 +183,10 @@ class Config(object):
                 self.ok = False
                 Logger.log_error("Oil limit must be an integer.")
 
+            if not isinstance(self.combat['retire_cycle'], int) or self.combat['retire_cycle'] <= 0:
+                self.ok = False
+                Logger.log_error("RetireCycle must be an integer > 0.")
+
             if map[0] != "E" and self.combat['siren_elites']:
                 self.ok = False
                 Logger.log_error("Story maps don't have elite units.")
@@ -187,6 +201,11 @@ class Config(object):
             if self.events['name'] not in events or all(elem not in stages for elem in self.events['levels']):
                 self.ok = False
                 Logger.log_error("Invalid event settings, please check the wiki.")
+                
+        if self.retirement['enabled']:
+            if not (self.retirement['commons'] or self.retirement['rares']):
+                Logger.log_error("Retirement is enabled, but no ship rarities are selected.")
+                self.ok = False
 
     def _rollback_config(self, config):
         """Method to roll back the config to the passed in config's.
