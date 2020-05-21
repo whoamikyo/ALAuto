@@ -32,6 +32,7 @@ class Config(object):
         self.academy = {'enabled': False}
         self.research = {'enabled': False}
         self.events = {'enabled': False}
+        self.drop_rates = {'enabled': False}
         self.network = {}
         self.assets = {}
         self.screenshot = {}
@@ -89,7 +90,7 @@ class Config(object):
 
         if config.getboolean('Enhancement', 'Enabled'):
             self._read_enhancement(config)
-        
+
         if 'Retirement' in config:
             # New retirement settings
             self.retirement['enabled'] = config.getboolean('Retirement', 'enabled', fallback=False)
@@ -106,6 +107,9 @@ class Config(object):
 
         if config.getboolean('Events', 'Enabled'):
             self._read_event(config)
+
+        if config.getboolean('DropRates', 'Enabled'):
+            self._read_droprates(config)
 
         self.validate()
         if (self.ok and not self.initialized):
@@ -222,6 +226,16 @@ class Config(object):
         self.events['levels'] = config.get('Events', 'Levels').split(',')
         self.events['ignore_rateup'] = config.getboolean('Events', 'IgnoreRateUp')
 
+    def _read_droprates(self, config):
+        """Method to parse the Drop Rate Research settings of the passed in config.
+        Args:
+            config (ConfigParser): ConfigParser instance
+        """
+        self.drop_rates['enabled'] = True
+        self.drop_rates['ComissionDrops'] = config.getboolean('DropRates', 'ComissionDrops')
+        self.drop_rates['MapDrops'] = config.getboolean('DropRates', 'MapDrops')
+        self.drop_rates['ResearchDrops'] = config.getboolean('DropRates', 'ResearchDrops')
+
     def validate(self):
         """Method to validate the passed in config file
         """
@@ -305,7 +319,7 @@ class Config(object):
             if self.events['name'] not in events or all(elem not in stages for elem in self.events['levels']):
                 self.ok = False
                 Logger.log_error("Invalid event settings, please check the wiki.")
-                
+
         if self.retirement['enabled']:
             if not (self.retirement['commons'] or self.retirement['rares']):
                 Logger.log_error("Retirement is enabled, but no ship rarities are selected.")
