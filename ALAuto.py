@@ -2,12 +2,14 @@ import sys
 import re
 import traceback
 import argparse
+import os.path
 from modules.combat import CombatModule
 from modules.commission import CommissionModule
 from modules.enhancement import EnhancementModule
 from modules.mission import MissionModule
 from modules.retirement import RetirementModule
 from modules.headquarters import HeadquartersModule
+from modules.research import ResearchModule
 from modules.event import EventModule
 from datetime import datetime, timedelta
 from util.adb import Adb
@@ -26,6 +28,7 @@ class ALAuto(object):
         'missions': None,
         'retirement': None,
         'headquarters': None,
+        'research': None,
         'event': None
     }
 
@@ -42,9 +45,6 @@ class ALAuto(object):
         self.stats = Stats(config)
         if self.config.updates['enabled']:
             self.modules['updates'] = UpdateUtil(self.config)
-        if self.config.combat['enabled']:
-            self.modules['combat'] = CombatModule(self.config, self.stats)
-            self.oil_limit = self.config.combat['oil_limit']
         if self.config.commissions['enabled']:
             self.modules['commissions'] = CommissionModule(self.config, self.stats)
         if self.config.enhancement['enabled']:
@@ -55,6 +55,11 @@ class ALAuto(object):
             self.modules['retirement'] = RetirementModule(self.config, self.stats)
         if self.config.dorm['enabled'] or self.config.academy['enabled']:
             self.modules['headquarters'] = HeadquartersModule(self.config, self.stats)
+        if self.config.combat['enabled']:
+            self.modules['combat'] = CombatModule(self.config, self.stats, self.modules['retirement'], self.modules['enhancement'])
+            self.oil_limit = self.config.combat['oil_limit']
+        if self.config.research['enabled']:
+            self.modules['research'] = ResearchModule(self.config, self.stats)
         if self.config.events['enabled']:
             self.modules['event'] = EventModule(self.config, self.stats)
         self.print_stats_check = True
@@ -87,25 +92,21 @@ class ALAuto(object):
         if self.modules['combat']:
             result = self.modules['combat'].combat_logic_wrapper()
 
-            if result == 1:
-                # if boss is defeated
-                Logger.log_msg("Boss successfully defeated, going back to menu.")
+            if result == 1 or result == 2:
+                # if boss is defeated or the number of requested fights is achieved
+                Logger.log_msg("Completed combat cycle.")
                 self.print_stats_check = True
-            if result == 2:
-                # if morale is too low
-                Logger.log_warning("Ships morale is too low, entering standby mode for an hour.")
-                self.next_combat = datetime.now() + timedelta(hours=1)
-                self.print_stats_check = False
             if result == 3:
-                # if dock is full
-                Logger.log_warning("Dock is full, need to retire.")
-
-                if self.modules['retirement']:
-                    self.modules['retirement'].retirement_logic_wrapper(True)
-                else:
-                    Logger.log_error("Retirement isn't enabled, exiting.")
-                    sys.exit()
+                # if morale is too low
+                Logger.log_warning("Ships morale is too low, entering standby mode for {} hour/s.".format(self.config.combat['low_mood_sleep_time']))
+                self.next_combat = datetime.now() + timedelta(hours=self.config.combat['low_mood_sleep_time'])
+                self.print_stats_check = False
             if result == 4:
+                # if dock is full
+                Logger.log_warning("Dock is full, need to retire/enhance.")
+                Logger.log_error("Retirement and Enhancement aren't enabled or both failed to exectute their task, exiting.")
+                sys.exit()
+            if result == 5:
                 Logger.log_warning("Failed to defeat enemy.")
                 self.print_stats_check = False
         else:
@@ -140,6 +141,12 @@ class ALAuto(object):
         """
         if self.modules['headquarters']:
             self.modules['headquarters'].hq_logic_wrapper()
+
+    def run_research_cycle(self):
+        """Method to run the research cycle.
+        """
+        if self.modules['research']:
+            self.modules['research'].research_logic_wrapper()
 
     def run_event_cycle(self):
         """Method to run the event cycle
@@ -183,11 +190,11 @@ script = ALAuto(config)
 script.run_update_check()
 
 Adb.service = config.network['service']
-Adb.device = '-d' if (Adb.service == 'PHONE') else '-e'
+Adb.tcp = False if (Adb.service.find(':') == -1) else True
 adb = Adb()
 
 if adb.init():
-    Logger.log_msg('Successfully connected to the service.')
+    Logger.log_msg('Successfully connected to the service with transport_id({}).'.format(Adb.transID))
     output = Adb.exec_out('wm size').decode('utf-8').strip()
 
     if not re.search('1920x1080|1080x1920', output):
@@ -195,6 +202,10 @@ if adb.init():
         sys.exit()
 
     Utils.assets = config.assets['server']
+
+    # screencap init
+    Utils.init_screencap_mode(config.screenshot['mode'])
+
 else:
     Logger.log_error('Unable to connect to the service.')
     sys.exit()
@@ -215,6 +226,8 @@ try:
             script.run_mission_cycle()
         if Utils.find("headquarters/hq_alert"):
             script.run_hq_cycle()
+        if Utils.find("research/lab_alert"):
+            script.run_research_cycle()
         if script.should_sortie():
             script.run_sortie_cycle()
             script.print_cycle_stats()
@@ -231,6 +244,8 @@ except KeyboardInterrupt:
     f.close()
     script.stats.print_stats(0)
     sys.exit(0)
+except SystemExit:
+    pass
 except:
     # registering whatever exception occurs during execution
     Logger.log_error("An error occurred. For more info check the traceback.log file.")

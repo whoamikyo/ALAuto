@@ -1,7 +1,9 @@
 import configparser
 import sys
+import re
 from copy import deepcopy
 from util.logger import Logger
+import util.config_consts
 
 
 class Config(object):
@@ -28,16 +30,49 @@ class Config(object):
         self.retirement = {'enabled': False}
         self.dorm = {'enabled': False}
         self.academy = {'enabled': False}
+        self.research = {'enabled': False}
         self.events = {'enabled': False}
         self.network = {}
         self.assets = {}
+        self.screenshot = {}
         self.read()
 
+    def try_cast_to_int(self, val):
+        """Helper function that attempts to coerce the val to an int,
+        returning the val as-is the cast fails
+        Args:
+            val (string): string to attempt to cast to int
+        Returns:
+            int, str: int if the cast was successful; the original str
+                representation otherwise
+        """
+        try:
+            return int(val)
+        except ValueError:
+            return val
+
+    def try_cast_to_float(self, val):
+        """Helper function that attempts to coerce the val to a float,
+        returning the val as-is the cast fails
+        Args:
+            val (string): string to attempt to cast to float
+        Returns:
+            float, str: float if the cast was successful; the original str
+                representation otherwise
+        """
+        try:
+            return float(val)
+        except ValueError:
+            return val
+
     def read(self):
+
         backup_config = deepcopy(self.__dict__)
         config = configparser.ConfigParser()
         config.read(self.config_file)
         self.network['service'] = config.get('Network', 'Service')
+        self._read_screenshot(config)
+
         self.assets['server'] = config.get('Assets', 'Server')
 
         if config.getboolean('Updates', 'Enabled'):
@@ -50,8 +85,10 @@ class Config(object):
             self._read_headquarters(config)
 
         self.commissions['enabled'] = config.getboolean('Modules', 'Commissions')
-        self.enhancement['enabled'] = config.getboolean('Modules', 'Enhancement')
         self.missions['enabled'] = config.getboolean('Modules', 'Missions')
+
+        if config.getboolean('Enhancement', 'Enabled'):
+            self._read_enhancement(config)
         
         if 'Retirement' in config:
             # New retirement settings
@@ -64,12 +101,17 @@ class Config(object):
             self.retirement['rares'] = True
             self.retirement['commons'] = True
 
+        if config.getboolean('Research', 'Enabled'):
+            self._read_research(config)
+
         if config.getboolean('Events', 'Enabled'):
             self._read_event(config)
 
         self.validate()
         if (self.ok and not self.initialized):
             Logger.log_msg("Starting ALAuto!")
+            if self.combat['enabled'] and self.combat['ignore_morale']:
+                Logger.log_warning("Ignore morale is enabled")
             self.initialized = True
             self.changed = True
         elif (not self.ok and not self.initialized):
@@ -83,8 +125,21 @@ class Config(object):
                 Logger.log_warning("Config change detected. Hot-reloading.")
                 self.changed = True
 
+    def _read_screenshot(self, config):
+        """Method to parse the Updates settings of the passed in config.
+            Args:
+                config (ConfigParser): ConfigParser instance
+        """
+
+        consts = util.config_consts.UtilConsts.ScreenCapMode
+        self.screenshot['mode'] = self._validate_list(config.get('Screenshot', 'Mode'), min_len=1, max_len=1,
+                                                      valid_vals=['SCREENCAP_PNG', 'SCREENCAP_RAW', 'ASCREENCAP'],
+                                                      map_vals=[consts.SCREENCAP_PNG, consts.SCREENCAP_RAW,
+                                                                consts.ASCREENCAP],
+                                                      cast=lambda x: x.upper())[0]
+
     def _read_updates(self, config):
-        """Method to parse the Combat settings of the passed in config.
+        """Method to parse the Updates settings of the passed in config.
         Args:
             config (ConfigParser): ConfigParser instance
         """
@@ -98,14 +153,20 @@ class Config(object):
         """
         self.combat['enabled'] = True
         self.combat['map'] = config.get('Combat', 'Map')
-        self.combat['kills_before_boss'] = int(config.get('Combat', 'KillsBeforeBoss'))
+        self.combat['kills_before_boss'] = self.try_cast_to_int(config.get('Combat', 'KillsBeforeBoss'))
         self.combat['boss_fleet'] = config.getboolean('Combat', 'BossFleet')
-        self.combat['oil_limit'] = int(config.get('Combat', 'OilLimit'))
-        self.combat['retire_cycle'] = int(config.get('Combat', 'RetireCycle'))
-        self.combat['retreat_after'] = int(config.get('Combat', 'RetreatAfter'))
+        self.combat['oil_limit'] = self.try_cast_to_int(config.get('Combat', 'OilLimit'))
+        self.combat['retire_cycle'] = self.try_cast_to_int(config.get('Combat', 'RetireCycle'))
+        self.combat['retreat_after'] = self.try_cast_to_int(config.get('Combat', 'RetreatAfter'))
+        self.combat['ignore_mystery_nodes'] = config.getboolean('Combat', 'IgnoreMysteryNodes')
+        self.combat['focus_on_mystery_nodes'] = config.getboolean('Combat', 'FocusOnMysteryNodes')
+        self.combat['clearing_mode'] = config.getboolean('Combat', 'ClearingMode')
         self.combat['hide_subs_hunting_range'] = config.getboolean('Combat', 'HideSubsHuntingRange')
         self.combat['small_boss_icon'] = config.getboolean('Combat', 'SmallBossIcon')
         self.combat['siren_elites'] = config.getboolean('Combat', 'SirenElites')
+        self.combat['ignore_morale'] = config.getboolean('Combat', 'IgnoreMorale')
+        self.combat['low_mood_sleep_time'] = self.try_cast_to_float(config.get('Combat', 'LowMoodSleepTime'))
+        self.combat['search_mode'] = self.try_cast_to_int(config.get('Combat', 'SearchMode'))
 
     def _read_headquarters(self, config):
         """Method to parse the Headquarters settings passed in config.
@@ -113,9 +174,43 @@ class Config(object):
             config (ConfigParser): ConfigParser instance
         """
         self.dorm['enabled'] = config.getboolean('Headquarters', 'Dorm')
+        if self.dorm['enabled']:
+            self.dorm['AvailableSupplies'] = self._validate_list(config.get('Headquarters', 'AvailableSupplies'),
+                                                                 valid_vals=[1000, 2000, 3000, 5000, 10000, 20000],
+                                                                 min_len=1, max_len=6, cast=int, unique=True)
         self.academy['enabled'] = config.getboolean('Headquarters', 'Academy')
         if self.academy['enabled']:
-            self.academy['skill_book_tier'] = int(config.get('Headquarters', 'SkillBookTier'))
+            self.academy['skill_book_tier'] = self.try_cast_to_int(config.get('Headquarters', 'SkillBookTier'))
+
+    def _read_enhancement(self, config):
+        """Method to parse the Enhancement settings of the passed in config.
+        Args:
+            config (ConfigParser): ConfigParser instance
+        """
+        self.enhancement['enabled'] = True
+        self.enhancement['single_enhancement'] = config.getboolean('Enhancement', 'SingleEnhancement')
+
+    def _read_research(self, config):
+        """Method to parse the Research settings of the passed in config.
+        Args:
+            config (ConfigParser): ConfigParser instance
+        """
+        self.research['enabled'] = True
+        self.research['AllowFreeProjects'] = config.getboolean('Research', 'AllowFreeProjects')
+        self.research['AllowConsumingCoins'] = config.getboolean('Research', 'AllowConsumingCoins')
+        self.research['AllowConsumingCubes'] = config.getboolean('Research', 'AllowConsumingCubes')
+        self.research['WithoutRequirements'] = config.getboolean('Research', 'WithoutRequirements')
+        self.research['AwardMustContainPRBlueprint'] = config.getboolean('Research', 'AwardMustContainPRBlueprint')
+        self.research['30Minutes'] = config.getboolean('Research', '30Minutes')
+        self.research['1Hour'] = config.getboolean('Research', '1Hour')
+        self.research['1Hour30Minutes'] = config.getboolean('Research', '1Hour30Minutes')
+        self.research['2Hours'] = config.getboolean('Research', '2Hours')
+        self.research['2Hours30Minutes'] = config.getboolean('Research', '2Hours30Minutes')
+        self.research['4Hours'] = config.getboolean('Research', '4Hours')
+        self.research['5Hours'] = config.getboolean('Research', '5Hours')
+        self.research['6Hours'] = config.getboolean('Research', '6Hours')
+        self.research['8Hours'] = config.getboolean('Research', '8Hours')
+        self.research['12Hours'] = config.getboolean('Research', '12Hours')
 
     def _read_event(self, config):
         """Method to parse the Event settings of the passed in config.
@@ -128,24 +223,10 @@ class Config(object):
         self.events['ignore_rateup'] = config.getboolean('Events', 'IgnoreRateUp')
 
     def validate(self):
-        def try_cast_to_int(val):
-            """Helper function that attempts to coerce the val to an int,
-            returning the val as-is the cast fails
-            Args:
-                val (string): string to attempt to cast to int
-            Returns:
-                int, str: int if the cast was successful; the original str
-                    representation otherwise
-            """
-            try:
-                return int(val)
-            except ValueError:
-                return val
-
         """Method to validate the passed in config file
         """
         if not self.initialized:
-            Logger.log_msg("Validating config")
+          Logger.log_msg("Validating config")
         self.ok = True
 
         valid_servers = ['EN', 'JP']
@@ -157,7 +238,8 @@ class Config(object):
             self.ok = False
 
         if not self.combat['enabled'] and not self.commissions['enabled'] and not self.enhancement['enabled'] \
-           and not self.missions['enabled'] and not self.retirement['enabled'] and not self.events['enabled']:
+           and not self.missions['enabled'] and not self.retirement['enabled'] and not self.research['enabled'] \
+            and not self.events['enabled'] and not self.dorm['enabled'] and not self.academy['enabled']:
             Logger.log_error("All modules are disabled, consider checking your config.")
             self.ok = False
 
@@ -174,8 +256,8 @@ class Config(object):
                                                 'C1', 'C2', 'C3', 'C4',
                                                 'D1', 'D2', 'D3', 'D4',
                                                 'SP1', 'SP2', 'SP3', 'SP4', 'SP5']
-            if (try_cast_to_int(map[0]) not in valid_chapters or
-                try_cast_to_int(map[1]) not in valid_levels):
+            if (self.try_cast_to_int(map[0]) not in valid_chapters or
+                self.try_cast_to_int(map[1]) not in valid_levels):
                 self.ok = False
                 Logger.log_error("Invalid Map Selected: '{}'."
                                 .format(self.combat['map']))
@@ -196,9 +278,26 @@ class Config(object):
                 self.ok = False
                 Logger.log_error("Invalid KillsBeforeBoss value: must be an integer >= 0.")
 
+            if not isinstance(self.combat['retreat_after'], int) or self.combat['retreat_after'] < 0:
+                self.ok = False
+                Logger.log_error("Invalid RetreatAfter value: must be an integer >= 0.")
+
             if map[0] != "E" and self.combat['small_boss_icon']:
                 self.ok = False
                 Logger.log_error("Story maps don't have small boss icon.")
+
+            if not isinstance(self.combat['low_mood_sleep_time'], float) or self.combat['low_mood_sleep_time'] < 0:
+                self.ok = False
+                Logger.log_error("LowMoodSleepTime must be a float > 0.")
+
+            if self.combat['search_mode'] not in [0, 1]:
+                self.ok = False
+                Logger.log_error("Wrong search mode. Allowed values: [0, 1].")
+
+        if self.academy['enabled']:
+            tier = self.academy['skill_book_tier']
+            if not isinstance(tier, int) or not 1 <= tier <= 3:
+                Logger.log_error("Skill book tier must be an integer between 1 and 3.")
 
         if self.events['enabled']:
             events = ['Crosswave', 'Royal_Maids']
@@ -212,6 +311,11 @@ class Config(object):
                 Logger.log_error("Retirement is enabled, but no ship rarities are selected.")
                 self.ok = False
 
+        if self.research['enabled']:
+            if not (self.research['30Minutes'] or self.research['1Hour'] or self.research['1Hour30Minutes'] or self.research['2Hours'] or self.research['2Hours30Minutes'] or self.research['4Hours'] or self.research['5Hours'] or self.research['6Hours'] or self.research['8Hours'] or self.research['12Hours']):
+                Logger.log_error("Research is enabled, but without allowed times.")
+                self.ok = False
+
     def _rollback_config(self, config):
         """Method to roll back the config to the passed in config's.
         Args:
@@ -219,3 +323,24 @@ class Config(object):
         """
         for key in config:
             setattr(self, key, config['key'])
+
+    def _validate_list(self, val, min_len=None, max_len=None, valid_vals=None, map_vals=None, cast=None, unique=False):
+        s_list = re.split(r'\s*,\s*|\s+', val)
+
+        if min_len is not None and len(s_list) < min_len:
+            raise ValueError()
+        if max_len is not None and len(s_list) > max_len:
+            raise ValueError()
+        if s_list is not None:
+            for i in range(len(s_list)):
+                s_list[i] = cast(s_list[i])
+        if valid_vals is not None:
+            for v in s_list:
+                if v not in valid_vals:
+                    raise ValueError()
+                if map_vals is not None:
+                    s_list[i] = map_vals[valid_vals.index(s_list[i])]
+        if unique and len(set(s_list)) != len(s_list):
+            raise ValueError()
+
+        return s_list
